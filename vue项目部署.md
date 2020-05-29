@@ -49,36 +49,79 @@
 	   // axios.defaults.baseURL = 'http://10.8.3.243:8082';
 	 }
 	 
-### 使用proxy处理跨域问题
+### vue的跨域问题
 
-参考文章：https://juejin.im/post/5d1cc073f265da1bcb4f486d
+	https://segmentfault.com/a/1190000016199721
 
-代理处理跨域问题，测试环境可以，上线环境需要后端处理
+1. 前端在测试环境设置代理，进行跨域
 
-1. vue-cli3版本，在vue.config.js中设置devServer
-
-		devServer : {
-	        proxy : {
-	            '/index' : {
-	                target : 'http://localhost/index',
-	                // ws : true,
-	                changeOrigin : true,
-	                pathRewrite : {
-	                    '^/index' : ''
+		devServer: {
+	        proxy: {
+	            '/api':{
+	                target: 'http://10.8.5.230:8082',//代理地址
+	                changeOrigin:true,//是否跨域
+	                pathRewrite:{  //发送对象前重写路径
+	                    '^/api':'',
 	                }
 	            }
 	        }
-	    }
-成功获取数据后，我们访问的本来就是本地主机，只不过proxy转发了这个请求到一个新的地址。
-* 首先，axios去访问/index/phpinfo.php，这是个相对地址，所以真实访问地址其实是localhost:8080/index/phpinfo.php
-* 然而/index/phpinfo.php被我们配置的/index匹配到了 ，所以访问被proxy代理，那转发到哪个路径呢？在pathRewrite中，我们将模式^/index的路径清除了，所以最终的访问路径是 target+pathRewrite+ 剩余的部分 ， 这样也就是 http://localhost/index++/phpinfo.php
+	    },
+ * 	设置代理要有一个标识，告诉node，接口以'/api'开头的才使用代理
+ *   	'^/api'，“^”匹配的是字符串最开始的位置，axios进行请求时，'/api/login'，在经过代理服务器时会变成/login
+ *    路径重写，也就是说会修改最终请求的API路径。比如访问的API路径：/api/login,
+ *    设置pathRewrite: {'^/api' : ''},后，最终代理访问的路径：http://10.8.5.230:8082/users，这个参数的目的是给代理命名后，在访问时把命名删除掉。
+		
+2. 设置nginx反向代理，部署项目到服务器上
+	 
+* nginx->conf->nginx.conf  配置反向代理
+  
+		server{
+			location /{
+				root  html;//root对应index.html对应的外层文件夹所在的位置
+				index  index.html  index.htm;
+			}，
+			location /api {     //匹配前端配置的名称
+				rewrite  ^.+api/?(.*)$  /$/ break; //重写路径，所有以api请假的接口
+				proxy_pass http:10.8.3.247;//代理地址
+				proxy_set_header Host $host; 
+				proxy_set_header X-Real-Ip $remote_addr;
+				proxy_set_header X-Forward-For $proxy_add_x_forwarded_for
+			}
+		}
+	   
+### 将项目部署到服务器上
+1. 连接服务器，终端-->shell-->新建远程连接-->ssh-->新增服务器地址，选中服务器连接
+2. 上传打包文件
 
+	终端-->shell-->新建远程连接-->文件传输-->选中服务器连接 ，输入命令 ,上传文件
+	
+	` put /Users/liuxuesong/Documents/云管2020/web/dist.zip /usr/local/nginx/prodist `
+	
+	  `/usr/local/nginx/prodist 要上传到的路径`
+	
+	`/Users/liuxuesong/Documents/云管2020/web/dist.zip压缩文件在本地的路径`
+2. 找到打包后的文件要放置的位置 
 
+		cd /usr/local/nginx/prodist
 
+3. 删除prodist下的所有文件
+	 `rm -rf *`
+4.  解压文件 
+	`unzip dist.zip`
 	
-	
-	
-	
+5. 进入dist,复制dist内文件到上一层	
+	`cp -r * ../`
+6. 进入nginx文件夹，停止nginx,在启动
+	`cd usr/local/nginx/sbin`
+	`./nginx -s stop`
+	`./nginx`
+7. 进入nginx ，配置nginx.conf文件
+  `vim nginx.conf`
+  编辑 i，
+  退去编辑并保存 esc->:wq
+  强制退出不保存 esc->:q!
+8. 配置nginx后，重新启动
+	`./nginx -s reload`   	
 	
 	
 	

@@ -613,7 +613,7 @@ setInterval定时器循环执行，不停止，setTimeout定时器，触发后�
   ` https://forum.vuejs.org/t/how-to-access-the-elements-of---ob---observer-in-vuejs/22404/4`
   
   
-### vue中ob_ observer的意思？
+### vue中ob_observer的意思？
  1. Observer是一个内部Vue对象，它使数据具有反应性。你无需做任何事情。您可以像在javascript中那样获取或访问数据。您的数据上的私有财产没有任何变化。
  2. 相当于对数据设置的监控器。
 
@@ -769,3 +769,15 @@ https://blog.csdn.net/yihanzhi/article/details/74200618
 		};
 		
 		const routes = recursiveRouterConfig(routerConfig);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
