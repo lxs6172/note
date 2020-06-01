@@ -12,7 +12,6 @@
 3. 代码块进行依次处理，less变为css,jquery变为浏览器识别的js的语法，这个过程称为打包
 4. 打包成功后将资源输出，输出的文件叫bundle
 
-t
 ###webpack的五个核心概念
 
 1. Entry:入口指示，webpack以哪个文件为入口起点开始打包，分析构建内部依赖图
@@ -21,7 +20,12 @@ t
 4. Plugins：插件可以用于执行范围更广的任务，插件的范围包括从打包优化和压缩，一直到重新定义环境中的变量等，loader相当于是翻译成webpack能识别的资源，功能跟强大的需要plugins
 5. Mode：模式分为两种development(开发模式)和production(生成模式)，development能让代码本地调试，运行的环境。production能让代码优化上线，运行的环境
 
-
+### webpack环境的初始化
+1. webpack init
+2. 设置名称，其他选择默认值
+3. sudo npm install webpack -g 
+3. npm i webpack-cli -g    全局安装webpack-cli包
+4. npm i webpack webpack-cli -D 本地安装webpack，webpack-cli
 ###运行指令？
 
 1. 开发环境指令：webpack以src下的index.js为入口文件开始打包，打包后输出到build下的index.js中，整体打包环境是开发环境
@@ -73,3 +77,67 @@ t
 		
 		不同的文件配置不同的loader，例如less,
 		user的内容为'style-loader','css-loader','less-loader'
+		
+### webpack打包html资源，图片资源
+1. 配置webpack.conf.js文件
+2.  引入插件 npm i html-webpack-plugin -D 
+3.  配置文件详细配置
+
+		const {resolve} =require('path')
+		const HtmlWebpackPlugin=require('html-webpack-plugin')
+		module.exports={
+		    entry:'./src/index.js',
+		    output:{
+		        filename:'build.js',//输出的文件名称
+		        path:resolve(__dirname,'build')//输出文件放入的路径
+		    },
+		    module:{
+		        rules:[
+		            // 配置loader
+		            {
+		                // 匹配哪些文件
+		                test:/|.less$/,
+		                // 使用哪些loader进行处理,多个loader使用use
+		                // use执行顺序有下至上
+		                use:[
+		                    'style-loader',//创建style标签，将js中的样式资源插入其中，添加到header中
+		                    'css-loader',//将css文件通过commin.js模块加载到js中，里面内容是以样式字符串形式存在的
+		                    'less-loader'//将less文件编译成css文件
+		                ]
+		            },
+		            // 处理图片资源
+		            {
+		                // 此方法默认不能处理html中引入的图片
+		                test:/\.(jpg|png|gif)$/,
+		                // 下载url-loader,file-loader
+		                loader:'url-loader',
+		                options:{
+		                    // 图片大小小于8kb，就会被base64处理
+		                    // 优点：减少请求数量（减轻服务器压力）
+		                    //缺点：转化后图片的体积会变大（文件请求速度变慢）
+		                    limit:8*1024,
+		                    // 问题：url-loader默认使用es6模块化解析，而html-loader引入图片是common.js
+		                    // 解决：关闭url-loader的es6模块，使用common.js解析
+		                    esModule:false,
+		                    // 输出图片名称重新命名
+		                    name:'[hash:10].[ext]'
+		                }
+		            },
+		            // 处理html中引入的图片
+		            {
+		                test:/\.html$/,
+		                // 负责引入img，从而使url-loader处理他
+		                loader:'html-loader'
+		            }
+		        ]
+		    },
+		    plugins:[
+		        // 插件，需要下载引入使用
+		        // html-webpack-plugin插件功能：默认创建一个html，自动引入打包输出的所有资源（js/css)
+		        new HtmlWebpackPlugin({
+		            // template复制一个'./src/index.html'文件，并将输出的js/css引入其中
+		            template:'./src/index.html'
+		        })
+		    ],
+		    mode:"development",
+		}

@@ -5,7 +5,6 @@
 
 `https://blog.csdn.net/qq_38337245/article/details/97518905`
 
-
 ### 项目打包，分为生产环境和测试环境
 
 `https://blog.csdn.net/seanxwq/article/details/87099484  `
@@ -90,6 +89,7 @@
 		}
 	   
 ### 将项目部署到服务器上
+`https://www.bilibili.com/video/BV1ZE41157FU?from=search&seid=4160680904972906499`
 1. 连接服务器，终端-->shell-->新建远程连接-->ssh-->新增服务器地址，选中服务器连接
 2. 上传打包文件
 
@@ -123,8 +123,16 @@
 8. 配置nginx后，重新启动
 	`./nginx -s reload`   	
 	
+### vue 项目部署的坑
+`https://segmentfault.com/a/1190000016919340	`
+`https://www.cnblogs.com/xiaofenguo/p/11290090.html`//路由动态刷新报错
 	
-	
+	configureWebpack: {//通过操作对象方式，修改webpack配置
+         output:{
+            filename:`/js/[name]_[chunkhash].js`,
+           chunkFilename:`/js/[name]_[chunkhash].js`
+         },
+      },	
 	
 	
 	
